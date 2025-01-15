@@ -133,3 +133,92 @@ query UniversalQuery {
   __typename
 }
 ```
+
+### The `Query` type
+
+The `Query` type is a special object type that defines all of the top-level entry points for queries that clients execute against your server.
+
+Each field of the `Query` type defines the name and return type of a different entry point. The `Query` type for our example schema might resemble the following:
+
+```gql
+type Query {
+  books: [Book]
+  authors: [Author]
+}
+```
+
+The `Query` types defines two fields: `books` and `authors`. Each field returns a list of the corresponding type.
+
+With a REST-based API, books and authors would probably be returned by different endpoints (e.g., `/api/books `and `/api/authors`). The flexibility of GraphQL enables clients to query both resources with a single request.
+
+### Structuring a query
+
+When your clients build queries to execute against your graph, those queries match the shape of the object types you define in your schema.
+
+Based on our example schema so far, a client could execute the following query, which requests both a list of all book titles and a list of all author names:
+
+```gql
+query GetBooksAndAuthors {
+  books {
+    title
+  }
+
+  authors {
+    name
+  }
+}
+```
+
+Our server would then respond to the query with results that match the query's structure, like so:
+
+```json
+{
+  "data": {
+    "books": [
+      {
+        "title": "City of Glass"
+      },
+      ...
+    ],
+    "authors": [
+      {
+        "name": "Paul Auster"
+      },
+      ...
+    ]
+  }
+}
+```
+
+Although it might be useful in some cases to fetch these two separate lists, a client would probably prefer to fetch a single list of books, where each book's author is included in the result.
+
+Because our schema's `Book` type has an `author` field of type `Author`, a client could instead structure their query like so:
+
+```gql
+query GetBooks {
+  books {
+    title
+    author {
+      name
+    }
+  }
+}
+```
+
+And once again, our server would respond with results that match the query's structure:
+
+```json
+{
+  "data": {
+    "books": [
+      {
+        "title": "City of Glass",
+        "author": {
+          "name": "Paul Auster"
+        }
+      },
+      ...
+    ]
+  }
+}
+```
